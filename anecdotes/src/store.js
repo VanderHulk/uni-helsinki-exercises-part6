@@ -20,7 +20,27 @@ const asObject = anecdote => ({
 
 const useAnecdoteStore = create((set) => ({
   anecdotes: anecdotesAtStart.map(asObject),
-  actions: {},
+  actions: {
+    addAVote: id => set(state => ({
+      anecdotes: state.anecdotes.map(anecdote => {
+        if (anecdote.id === id) {
+          return (
+            {
+              ...anecdote,
+              votes: anecdote.votes + 1
+            }
+          )
+        } else {
+          return anecdote
+        }
+      })
+    })),
+
+    createAnecdote: anecdote => set(state => ({
+      anecdotes: state.anecdotes.concat(asObject(anecdote))
+    }))
+  }
 }))
 
 export const useAnecdotes = () => useAnecdoteStore((state) => state.anecdotes)
+export const useActions = () => useAnecdoteStore((state) => state.actions)
