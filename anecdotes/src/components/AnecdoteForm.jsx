@@ -1,13 +1,15 @@
 import { useActions } from '../store'
-import { useState } from "react"
 
 const AnecdoteForm = () => {
-  const { createAnecdote } = useActions()
-  const [newAnecdote, setNewAnecdote] = useState(null)
+  const { createAnecdote } = useActions()  
 
-  const create = event => {
+  const create = async (event) => {
     event.preventDefault()
-    createAnecdote(newAnecdote)
+
+    const newAnecdote = event.target.note.value
+    await createAnecdote(newAnecdote)
+    
+    event.target.reset()
   }
 
   return (
@@ -15,7 +17,7 @@ const AnecdoteForm = () => {
       <h2>create new</h2>
       <form onSubmit={create}>
         <div>
-          <input data-testid="new" onChange={event => setNewAnecdote(event.target.value)} />
+          <input data-testid="new" name='note' />
         </div>
         <button>create</button>
       </form>

@@ -1,6 +1,8 @@
 
 import { create } from 'zustand'
 
+import anecdotesService from './services/anecdotes'
+
 const anecdotesAtStart = [
   'If it hurts, do it more often',
   'Adding manpower to a late software project makes it later!',
@@ -10,38 +12,36 @@ const anecdotesAtStart = [
   'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
 ]
 
-const getId = () => (100000 * Math.random()).toFixed(0)
-
-const asObject = anecdote => ({
-  content: anecdote,
-  id: getId(),
-  votes: 0
-})
-
-const useAnecdoteStore = create((set) => ({
-  anecdotes: anecdotesAtStart.map(asObject),
+const useAnecdoteStore = create((set, get) => ({
+  anecdotes: [],
   filter: null,
   actions: {
-    addAVote: id => set(state => ({
-      anecdotes: state.anecdotes.map(anecdote => {
-        if (anecdote.id === id) {
-          return (
-            {
-              ...anecdote,
-              votes: anecdote.votes + 1
-            }
-          )
-        } else {
-          return anecdote
-        }
-      })
-    })),
+    addAVote: async (id) => {
+      const anecdote = get().anecdotes.find(a => a.id === id)
+      const updated = await anecdotesService.update(id, { ...anecdote, votes: anecdote.votes + 1 })
+      set(state => ({
+        anecdotes: state.anecdotes.map(anecdote => anecdote.id === id ? updated : anecdote)
+      }))
+    },
 
-    createAnecdote: anecdote => set(state => ({
-      anecdotes: state.anecdotes.concat(asObject(anecdote))
-    })),
+    createAnecdote: async (anecdote) => {
+      const newAnecdote = {
+        content: anecdote,
+        votes: 0
+      }
+      await anecdotesService.create(newAnecdote)
 
-    setFilter: word => set(() => ({ filter: word }))
+      set(state => ({
+        anecdotes: state.anecdotes.concat(newAnecdote)
+      }))
+    },
+
+    setFilter: word => set(() => ({ filter: word })),
+
+    initialize: async () => {
+      const anecdotes = await anecdotesService.getAll()
+      set(() => ({ anecdotes }))
+    }
   }
 }))
 

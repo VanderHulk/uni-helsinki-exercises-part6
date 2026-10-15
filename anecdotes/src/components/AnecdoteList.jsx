@@ -3,11 +3,7 @@ import { useActions } from "../store"
 
 const AnecdoteList = () => {
   const anecdotes = useAnecdotes()
-  const { addAVote } = useActions()
-  
-  const vote = (id) => {
-    addAVote(id)
-  }
+  const { addAVote } = useActions() 
 
   const sortedAnecdotes = anecdotes.toSorted((a, b) => b.votes - a.votes)
 
@@ -17,7 +13,7 @@ const AnecdoteList = () => {
         <div>{anecdote.content}</div>
         <div>
           has {anecdote.votes}
-          <button onClick={() => vote(anecdote.id)}>vote</button>
+          <button onClick={() => addAVote(anecdote.id)}>vote</button>
         </div>
       </div>
     ))
